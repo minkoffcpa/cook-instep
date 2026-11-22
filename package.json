@@ -8,7 +8,7 @@
     "dev": "vercel dev",
     "test:extract": "node scripts/test-extract.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": { "node": "24.x" },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0"
   }

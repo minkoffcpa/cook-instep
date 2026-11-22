@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inline Recipe: Macaroni Salad</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: a single phone-width column built for reading at arm's length, one step per block, amounts set inside the sentence. */
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --fg: #1d2421;
+  --muted: #66706b;
+  --line: #e4e6e1;
+  --accent: #1f6b52;          /* herb green */
+  --accent-ink: #ffffff;
+  --qty-bg: #fdeeb8;          /* mustard highlight */
+  --qty-fg: #3d2f00;
+  --done: #b3b9b5;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121614; --surface: #1a201d; --fg: #e8ece9; --muted: #98a29d; --line: #2b332f;
+    --accent: #6fc7a3; --accent-ink: #0e1a15; --qty-bg: #4a3d0c; --qty-fg: #ffe9a3; --done: #56605b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121614; --surface: #1a201d; --fg: #e8ece9; --muted: #98a29d; --line: #2b332f;
+  --accent: #6fc7a3; --accent-ink: #0e1a15; --qty-bg: #4a3d0c; --qty-fg: #ffe9a3; --done: #56605b;
+  color-scheme: dark;
+}
+
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 18px; line-height: 1.55; }
+.wrap {
+  max-width: 560px; margin: 0 auto;
+  padding-block: 20px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 22px;
+}
+
+.note {
+  font-size: 14px; color: var(--muted); border: 1px dashed var(--line);
+  border-radius: 10px; padding: 10px 12px; line-height: 1.45;
+}
+
+header h1 {
+  font-family: var(--font-display); font-weight: 800; font-size: 38px; line-height: 1.05;
+  margin: 0 0 8px; letter-spacing: -0.01em; text-wrap: balance;
+}
+.meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: 15px; }
+.meta b { color: var(--fg); font-weight: 700; }
+
+.controls { display: flex; flex-direction: column; gap: 12px; }
+.seg {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px;
+}
+.seg button {
+  font: inherit; font-size: 15px; font-weight: 700; border: 0; border-radius: 9px; padding: 9px 6px;
+  background: transparent; color: var(--muted); cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button:focus-visible, .step:focus-visible, .wake:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.scale { flex: 1 1 220px; }
+
+.wake {
+  font: inherit; font-size: 14px; font-weight: 700; color: var(--accent); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; cursor: pointer;
+}
+.wake[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* Cook view */
+ol.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.step {
+  display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 14px 8px 14px 0;
+  border-bottom: 1px solid var(--line); cursor: pointer; border-radius: 6px;
+}
+.step:last-child { border-bottom: 0; }
+.num {
+  font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--accent);
+  text-align: right; line-height: 1.3; font-variant-numeric: tabular-nums;
+}
+.text { min-width: 0; }
+.q {
+  background: var(--qty-bg); color: var(--qty-fg); border-radius: 5px; padding: 1px 5px;
+  font-weight: 700; white-space: nowrap; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+}
+.opt { color: var(--muted); font-style: italic; }
+.step.done .text, .step.done .num { color: var(--done); }
+.step.done .text { text-decoration: line-through; text-decoration-thickness: 1px; }
+.step.done .q { background: transparent; color: var(--done); }
+.hint { font-size: 14px; color: var(--muted); margin: 0; }
+
+/* Ingredients view */
+ul.shop { list-style: none; margin: 0; padding: 0; }
+ul.shop li {
+  display: grid; grid-template-columns: minmax(90px, auto) 1fr; gap: 14px; padding: 12px 0;
+  border-bottom: 1px solid var(--line); align-items: baseline;
+}
+ul.shop .amt { font-weight: 700; font-variant-numeric: tabular-nums; }
+ul.shop .used { display: block; font-size: 14px; color: var(--muted); }
+
+/* Classic view */
+.classic { display: flex; flex-direction: column; gap: 18px; }
+.classic h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; margin: 0; }
+.classic ul, .classic ol { margin: 0; padding-left: 22px; }
+.classic li { margin-bottom: 6px; }
+.classic .ing { color: #3b77c9; }
+.callout {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 15px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .step { transition: background-color .15s; }
+}
+@media (hover: hover) { .step:hover { background: var(--surface); } }
+</style>
+
+<div class="wrap">
+  <p class="note"><a href="/" style="color:var(--accent)">‹ Back to Instep</a><br>Mockup. The steps match your screenshot; the amounts are typical for macaroni salad, not taken from the original recipe.</p>
+
+  <header>
+    <h1>Creamy Macaroni Salad</h1>
+    <div class="meta">
+      <span>Serves <b id="servings">6</b></span>
+      <span>Active <b>20 min</b></span>
+      <span>Chill <b>1–2 hr</b></span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="View">
+      <button id="v-cook" data-view="cook" aria-pressed="true">Cook</button>
+      <button id="v-shop" data-view="shop" aria-pressed="false">Ingredients</button>
+      <button id="v-classic" data-view="classic" aria-pressed="false">Old way</button>
+    </div>
+    <div class="row">
+      <div class="scale">
+        <div class="label" style="margin-bottom:6px">Batch size</div>
+        <div class="seg" role="group" aria-label="Batch size">
+          <button id="s-half" data-scale="0.5" aria-pressed="false">½×</button>
+          <button id="s-1" data-scale="1" aria-pressed="true">1×</button>
+          <button id="s-2" data-scale="2" aria-pressed="false">2×</button>
+          <button id="s-3" data-scale="3" aria-pressed="false">3×</button>
+        </div>
+      </div>
+      <button id="wake" class="wake" aria-pressed="false">Keep screen on</button>
+    </div>
+  </div>
+
+  <section id="cook">
+    <p class="hint">Tap a step to cross it off.</p>
+    <ol class="steps" id="steps"></ol>
+  </section>
+
+  <section id="shop" hidden>
+    <p class="hint">For shopping and getting things out of the fridge. You don't need this list while cooking.</p>
+    <ul class="shop" id="shoplist"></ul>
+  </section>
+
+  <section id="classic" class="classic" hidden>
+    <div class="callout">This is how recipes are usually printed. Try step 4 without scrolling back up.</div>
+    <div><h2>Ingredients</h2><ul id="classic-ings"></ul></div>
+    <div><h2>Instructions</h2><ol id="classic-steps"></ol></div>
+  </section>
+</div>
+
+<script>
+const ING = {
+  water_salt: { name: "kosher salt", shop: "kosher salt (for the pasta water)" },
+  macaroni:   { name: "elbow macaroni" },
+  vinegar:    { name: "apple cider vinegar" },
+  mayo:       { name: "mayonnaise" },
+  milk:       { name: "milk or half-and-half" },
+  sugar:      { name: "sugar", optional: true },
+  salt:       { name: "salt" },
+  pepper:     { name: "black pepper" },
+  carrots:    { name: "shredded carrots", shop: "carrots, shredded (about 2 medium)" },
+  onion:      { name: "red onion, finely diced", optional: true },
+  celery:     { name: "celery, diced", optional: true },
+};
+
+// A step is a list of text pieces and ingredient uses: {i: id, a: amount, u: unit, t?: inline text}
+const STEPS = [
+  ["Bring a ", {pot: true}, " of water and ", {i:"water_salt", a:1, u:"tbsp"}, " to a boil. Add ", {i:"macaroni", a:8, u:"oz"}, " and cook 2–3 minutes longer than the package's al dente time, until very tender but not falling apart."],
+  ["Drain thoroughly without rinsing. Transfer the warm macaroni to a large mixing bowl."],
+  ["Pour ", {i:"vinegar", a:2, u:"tbsp"}, " over the warm pasta and toss gently. Let stand 10 minutes to absorb the flavor, then let cool."],
+  ["In a separate bowl, whisk together ", {i:"mayo", a:1, u:"cup"}, ", ", {i:"milk", a:0.25, u:"cup"}, ", ", {i:"sugar", a:1, u:"tbsp"}, ", ", {i:"salt", a:1, u:"tsp"}, ", and ", {i:"pepper", a:0.5, u:"tsp"}, " until smooth."],
+  ["Add ", {i:"carrots", a:1, u:"cup"}, ", ", {i:"onion", a:0.25, u:"cup"}, ", and ", {i:"celery", a:2, u:"stalk"}, " to the cooled macaroni."],
+  ["Pour the dressing over the pasta and fold gently until everything is evenly coated."],
+  ["Cover and refrigerate for at least 1–2 hours, until thoroughly chilled."],
+  ["Stir before serving. If the macaroni has absorbed too much dressing, add up to ", {i:"milk", a:2, u:"tbsp", t:"milk"}, " to bring back its creamy texture."],
+  ["Serve chilled."],
+];
+
+const POT = { 0.5: "3-quart pot", 1: "4-quart pot", 2: "6-quart pot", 3: "8-quart pot" };
+const FRAC = ["", "⅛", "¼", "⅜", "½", "⅝", "¾", "⅞"];
+let scale = 1;
+let done = new Set();
+
+function fmt(n) {
+  const eighths = Math.round(n * 8);
+  const whole = Math.floor(eighths / 8), rem = eighths % 8;
+  if (eighths === 0) return "pinch";
+  return (whole ? String(whole) : "") + (whole && rem ? " " : "") + FRAC[rem];
+}
+function unit(u, n) {
+  const plural = n > 1;
+  if (u === "cup") return plural ? "cups" : "cup";
+  if (u === "stalk") return plural ? "stalks" : "stalk";
+  return u;
+}
+function amount(use) {
+  const n = use.a * scale;
+  return fmt(n) + " " + unit(use.u, n);
+}
+const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+function renderPiece(p) {
+  if (typeof p === "string") return esc(p);
+  if (p.pot) return esc(POT[scale]);
+  const ing = ING[p.i];
+  const name = p.t || ing.name;
+  return `<span class="q">${amount(p)}</span> ${esc(name)}${ing.optional ? ' <span class="opt">(if using)</span>' : ""}`;
+}
+
+function renderCook() {
+  document.getElementById("steps").innerHTML = STEPS.map((s, k) =>
+    `<li class="step${done.has(k) ? " done" : ""}" data-k="${k}" tabindex="0" role="button" aria-pressed="${done.has(k)}">
+       <span class="num">${k + 1}</span><span class="text">${s.map(renderPiece).join("")}</span></li>`).join("");
+}
+
+function uses() {
+  const map = new Map();
+  STEPS.forEach((s, k) => s.forEach(p => {
+    if (typeof p === "object" && p.i) {
+      if (!map.has(p.i)) map.set(p.i, []);
+      map.get(p.i).push({ ...p, step: k + 1 });
+    }
+  }));
+  return map;
+}
+
+function renderShop() {
+  const rows = [];
+  for (const [id, list] of uses()) {
+    const ing = ING[id];
+    const amt = list.map(amount).join(" + ");
+    const steps = list.map(u => u.step);
+    const used = steps.length > 1 ? `Split across steps ${steps.join(" and ")}` : `Step ${steps[0]}`;
+    rows.push(`<li><span class="amt">${amt}</span><span>${esc(ing.shop || ing.name)}${ing.optional ? ' <span class="opt">(optional)</span>' : ""}<span class="used">${used}</span></span></li>`);
+  }
+  document.getElementById("shoplist").innerHTML = rows.join("");
+}
+
+function renderClassic() {
+  const rows = [];
+  for (const [id, list] of uses()) {
+    const ing = ING[id];
+    const amt = list.map(amount).join(" + ");
+    rows.push(`<li>${amt} ${esc(ing.shop || ing.name)}${ing.optional ? " (optional)" : ""}</li>`);
+  }
+  document.getElementById("classic-ings").innerHTML = rows.join("");
+  document.getElementById("classic-steps").innerHTML = STEPS.map(s => "<li>" + s.map(p => {
+    if (typeof p === "string") return esc(p);
+    if (p.pot) return esc(POT[scale]);
+    const ing = ING[p.i];
+    const short = (p.t || ing.name).split(",")[0];
+    return `the <span class="ing">${esc(short)}</span>${ing.optional ? " (if using)" : ""}`;
+  }).join("") + "</li>").join("");
+}
+
+function renderAll() {
+  document.getElementById("servings").textContent = fmt(6 * scale);
+  renderCook(); renderShop(); renderClassic();
+}
+
+document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  ["cook", "shop", "classic"].forEach(v => document.getElementById(v).hidden = v !== b.dataset.view);
+}));
+document.querySelectorAll("[data-scale]").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("[data-scale]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  scale = Number(b.dataset.scale);
+  renderAll();
+}));
+
+function toggleStep(el) {
+  const k = Number(el.dataset.k);
+  done.has(k) ? done.delete(k) : done.add(k);
+  renderCook();
+}
+const stepsEl = document.getElementById("steps");
+stepsEl.addEventListener("click", e => { const el = e.target.closest(".step"); if (el) toggleStep(el); });
+stepsEl.addEventListener("keydown", e => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const el = e.target.closest(".step"); if (!el) return;
+  e.preventDefault(); const k = el.dataset.k; toggleStep(el);
+  stepsEl.querySelector(`[data-k="${k}"]`)?.focus();
+});
+
+let lock = null;
+const wakeBtn = document.getElementById("wake");
+wakeBtn.addEventListener("click", async () => {
+  if (lock) { try { await lock.release(); } catch {} lock = null; wakeBtn.setAttribute("aria-pressed", "false"); wakeBtn.textContent = "Keep screen on"; return; }
+  try {
+    lock = await navigator.wakeLock.request("screen");
+    wakeBtn.setAttribute("aria-pressed", "true"); wakeBtn.textContent = "Screen stays on";
+    lock.addEventListener("release", () => { lock = null; wakeBtn.setAttribute("aria-pressed", "false"); wakeBtn.textContent = "Keep screen on"; });
+  } catch { wakeBtn.textContent = "Not supported here"; }
+});
+
+renderAll();
+</script>

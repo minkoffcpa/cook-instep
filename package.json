@@ -1,0 +1,15 @@
+{
+  "name": "cook-instep",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Instep Recipes: recipes with the amounts written into every step",
+  "scripts": {
+    "dev": "vercel dev",
+    "test:extract": "node scripts/test-extract.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0"
+  }
+}
